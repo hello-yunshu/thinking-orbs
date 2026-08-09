@@ -39,7 +39,10 @@ export type Projector = (x: number, y: number, z: number) => [number, number, nu
 export interface OrbCanvas2D {
   fillStyle: string | object;
   strokeStyle: string | object;
+  globalAlpha: number;
   lineWidth: number;
+  save(): void;
+  restore(): void;
   beginPath(): void;
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void;
   fill(): void;
@@ -109,10 +112,36 @@ export function makeProj(yaw: number, tilt: number, cx: number, cy: number, scal
 /**
  * Painter: z-sort far→near, matte grayscale dots. On dark substrates the
  * ink value is mirrored (1 - white) so near dots read bright — the same
- * depth language on an inverted substrate.
+ * depth language on an inverted substrate. With a custom color, ink weight
+ * becomes opacity so the selected hue keeps the same 3D depth.
  */
-export function paint(ctx: OrbCanvas2D, dots: Dot[], dark: boolean, rMin = 0.3): void {
+export function paint(
+  ctx: OrbCanvas2D,
+  dots: Dot[],
+  dark: boolean,
+  rMin = 0.3,
+  color?: string
+): void {
   dots.sort((a, b) => a.z - b.z);
+
+  if (color) {
+    ctx.save();
+    const baseAlpha = ctx.globalAlpha;
+    ctx.fillStyle = color;
+    for (const d of dots) {
+      const alpha = d.a ?? 1;
+      const w = Math.min(1, Math.max(0, d.white));
+      const tintAlpha = alpha * (1 - w);
+      if (tintAlpha < 0.02) continue;
+      ctx.globalAlpha = baseAlpha * tintAlpha;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, Math.max(rMin, d.r), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+    return;
+  }
+
   for (const d of dots) {
     const alpha = d.a ?? 1;
     if (alpha < 0.02) continue;
@@ -126,7 +155,32 @@ export function paint(ctx: OrbCanvas2D, dots: Dot[], dark: boolean, rMin = 0.3):
 }
 
 /** Stroke pass for edge-based modes. Runs before `paint` so nodes sit on top. */
-export function paintLines(ctx: OrbCanvas2D, lines: Line[], dark: boolean): void {
+export function paintLines(
+  ctx: OrbCanvas2D,
+  lines: Line[],
+  dark: boolean,
+  color?: string
+): void {
+  if (color) {
+    ctx.save();
+    const baseAlpha = ctx.globalAlpha;
+    ctx.strokeStyle = color;
+    for (const l of lines) {
+      const alpha = l.a ?? 1;
+      const w = Math.min(1, Math.max(0, l.white));
+      const tintAlpha = alpha * (1 - w);
+      if (tintAlpha < 0.02) continue;
+      ctx.globalAlpha = baseAlpha * tintAlpha;
+      ctx.lineWidth = l.w;
+      ctx.beginPath();
+      ctx.moveTo(l.x1, l.y1);
+      ctx.lineTo(l.x2, l.y2);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
   for (const l of lines) {
     const alpha = l.a ?? 1;
     if (alpha < 0.02) continue;

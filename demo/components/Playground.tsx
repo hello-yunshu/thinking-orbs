@@ -18,13 +18,22 @@ const STATES: OrbState[] = [
   'cleaning'
 ];
 const SIZES: OrbSize[] = [64, 20];
+const COLORS = [
+  { label: 'Theme', value: undefined },
+  { label: 'Accent', value: 'var(--orb-accent)' },
+  { label: 'Violet', value: '#8b5cf6' },
+  { label: 'Sky', value: '#0ea5e9' },
+  { label: 'Emerald', value: '#10b981' },
+  { label: 'Amber', value: '#f59e0b' }
+] as const;
 
 const SPEED_MIN = 25;
 const SPEED_MAX = 300;
 
-function buildSnippet(state: OrbState, size: OrbSize, speed: number) {
+function buildSnippet(state: OrbState, size: OrbSize, speed: number, color?: string) {
   const props = [`state="${state}"`, `size={${size}}`];
   if (speed !== 100) props.push(`speed={${(speed / 100).toFixed(2)}}`);
+  if (color) props.push(`color="${color}"`);
   return `import { ThinkingOrb } from 'thinking-orbs';\n\n<ThinkingOrb ${props.join(' ')} />`;
 }
 
@@ -55,12 +64,13 @@ export function Playground({
 }) {
   const [state, setState] = useState<OrbState>('listening');
   const [size, setSize] = useState<OrbSize>(64);
+  const [color, setColor] = useState<string | undefined>('var(--orb-accent)');
   // Playground starts paused so the page loads quietly; the PlayPauseToggle
   // below only flips this local state, so the surrounding Examples keep
   // auto-playing regardless.
   const [paused, setPaused] = useState(true);
 
-  const snippet = buildSnippet(state, size, speed);
+  const snippet = buildSnippet(state, size, speed, color);
   const fillPct = ((speed - SPEED_MIN) / (SPEED_MAX - SPEED_MIN)) * 100;
 
   return (
@@ -75,6 +85,27 @@ export function Playground({
               {STATES.map((s) => (
                 <TabBtn key={s} active={state === s} onClick={() => setState(s)}>
                   {s.charAt(0).toUpperCase() + s.slice(1)}
+                </TabBtn>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-[9px] min-w-0" role="radiogroup" aria-label="Orb color">
+            <span className="text-xs font-normal leading-[14px] text-(--text-muted)">Color</span>
+            <div className="flex gap-2 items-center flex-wrap">
+              {COLORS.map((option) => (
+                <TabBtn
+                  key={option.label}
+                  active={color === option.value}
+                  onClick={() => setColor(option.value)}
+                  aria-label={`${option.label} orb color`}
+                >
+                  <span
+                    className="size-2.5 rounded-full mr-1.5 border border-current/20"
+                    style={{ background: option.value ?? 'currentColor' }}
+                    aria-hidden="true"
+                  />
+                  {option.label}
                 </TabBtn>
               ))}
             </div>
@@ -114,7 +145,14 @@ export function Playground({
       </div>
 
       <div className="relative w-full min-h-[304px] rounded-[10px] bg-(--surface) flex flex-col items-center justify-center p-12 gap-6 max-sm:p-6">
-        <ThinkingOrb key={`${state}-${size}`} state={state} size={size} speed={speed / 100} paused={paused} />
+        <ThinkingOrb
+          key={`${state}-${size}-${color ?? 'theme'}`}
+          state={state}
+          size={size}
+          color={color}
+          speed={speed / 100}
+          paused={paused}
+        />
         <PlayPauseToggle playing={!paused} onToggle={() => setPaused((p) => !p)} className="max-sm:absolute max-sm:bottom-6 max-sm:left-1/2 max-sm:-translate-x-1/2" />
       </div>
 

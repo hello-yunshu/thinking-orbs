@@ -5,6 +5,7 @@
     --bg: #070707;
     --surface: rgba(217, 217, 217, 0.05);
     --text: #fbfbfb;
+    --orb-accent: #ff7aa2;
     --text-muted: rgba(251, 251, 251, 0.6);
     --heading-fg: #ffffff;
     --code-bg: #121212;
@@ -68,6 +69,7 @@
     --bg: white;
     --surface: rgba(0, 0, 0, 0.04);
     --text: #1a1a1a;
+    --orb-accent: #c026d3;
     --text-muted: rgba(7, 7, 7, 0.6);
     --heading-fg: #1a1a1a;
     --code-bg: #ebebeb;

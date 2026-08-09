@@ -5,7 +5,7 @@
 import type { Dot, Line, ModeDraw } from './types';
 import { fibDir, frac, hashD, lerp, makeProj, paint, paintLines, radiusScale, vnoise } from './core';
 
-export const drawWeb: ModeDraw = (ctx, size, t, dark, o) => {
+export const drawWeb: ModeDraw = (ctx, size, t, dark, o, color) => {
   const cx = size / 2;
   const cy = size / 2;
   const R = (size / 2) * 0.8 * (o.spread ?? 1);
@@ -93,6 +93,6 @@ export const drawWeb: ModeDraw = (ctx, size, t, dark, o) => {
     });
   }
 
-  paintLines(ctx, lines, dark);
-  paint(ctx, dots, dark, o.rMin);
+  paintLines(ctx, lines, dark, color);
+  paint(ctx, dots, dark, o.rMin, color);
 };

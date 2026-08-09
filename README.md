@@ -1,13 +1,15 @@
 # thinking-orbs
 
-Dotted thought-orb loading indicators for AI & agent UIs. Ten hand-tuned animated states, each shipped at two purpose-tuned sizes, rendered on a plain 2D canvas — no WebGL, no filters, works identically in Chrome, Safari and Firefox.
+Dotted thought-orb loading indicators for AI & agent UIs. Ten hand-tuned animated states, two purpose-tuned sizes, and native CSS color support, rendered on a plain 2D canvas — no WebGL, no filters, works identically in Chrome, Safari and Firefox.
 
-[Live demo](https://orbs.jakubantalik.com) · [Repository](https://github.com/Jakubantalik/thinking-orbs) · [Report an issue](https://github.com/Jakubantalik/thinking-orbs/issues)
+[Upstream demo](https://orbs.jakubantalik.com) · [Fork repository](https://github.com/hello-yunshu/thinking-orbs) · [Report an issue](https://github.com/hello-yunshu/thinking-orbs/issues)
 
 ## Install
 
+Install this fork directly from GitHub:
+
 ```bash
-npm install thinking-orbs
+npm install github:hello-yunshu/thinking-orbs
 ```
 
 ## Quick start
@@ -48,7 +50,7 @@ Two tuned presets — separate designs, not a scale factor. `64` for chat-avatar
 
 ## Theme
 
-Strictly monochrome — light ink for dark backgrounds, dark ink for light backgrounds — with the mode picked automatically from the host project:
+The default remains monochrome — light ink for dark backgrounds, dark ink for light backgrounds — with the mode picked automatically from the host project:
 
 ```tsx
 <ThinkingOrb theme="auto" />   {/* default — detects from the project */}
@@ -62,12 +64,25 @@ Strictly monochrome — light ink for dark backgrounds, dark ink for light backg
 2. otherwise `prefers-color-scheme`, subscribed for live OS theme switches;
 3. SSR-safe — the canvas paints only on the client, after the theme has resolved.
 
+## Color
+
+Set any CSS color without losing the orb's depth shading. Literal colors, `currentColor`, and CSS variables are all supported:
+
+```tsx
+<ThinkingOrb color="#8b5cf6" />
+<ThinkingOrb color="currentColor" />
+<ThinkingOrb color="var(--accent)" />
+```
+
+`color` takes precedence over `theme`. CSS variables are resolved to a browser color before the canvas is painted, and the component redraws when ancestor classes, `data-theme`, inline styles, or the OS color scheme change. Omitting `color` preserves the original monochrome rendering.
+
 ## Other props
 
 ```tsx
 <ThinkingOrb
   state="solving"
   size={20}
+  color="var(--accent)" // optional CSS color; overrides theme ink
   speed={1.5}          // multiplier on the preset's baked speed
   paused={false}       // freeze on the current frame
   aria-label="Analysing repository…"  // overrides the per-state default
@@ -82,6 +97,15 @@ All other `<canvas>` props (`className`, `style`, `data-*`, …) pass through.
 - `prefers-reduced-motion: reduce` renders a static representative frame — no animation — and still follows the live theme.
 - Every instance pauses automatically when scrolled offscreen (`IntersectionObserver`) or when the tab is hidden, and resumes in phase — all instances share one clock.
 - Plain 2D canvas arcs only: no `ctx.filter`, no SVG filters, no WebGL — the same pixels everywhere, cheap on low-end devices. Device-pixel-ratio capped at 2.
+
+## Raw canvas API
+
+Power users can pass a resolved canvas color as the sixth argument to a raw painter. CSS variables should be resolved by the host before using this lower-level API:
+
+```ts
+const { mode, speed, opts } = resolvePreset('searching', 64);
+MODE_DRAWS[mode](ctx, 64, performance.now() / 1000 * speed, true, opts, '#8b5cf6');
+```
 
 ## License
 

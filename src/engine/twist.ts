@@ -38,7 +38,7 @@ function stroke(p: number, dwell: number): number {
   return s < 0 ? -m : m;
 }
 
-export const drawTwist: ModeDraw = (ctx, size, t, dark, o) => {
+export const drawTwist: ModeDraw = (ctx, size, t, dark, o, color) => {
   const cx = size / 2;
   const cy = size / 2;
   const R = (size / 2) * 0.82;
@@ -87,5 +87,5 @@ export const drawTwist: ModeDraw = (ctx, size, t, dark, o) => {
       });
     }
   }
-  paint(ctx, dots, dark, o.rMin);
+  paint(ctx, dots, dark, o.rMin, color);
 };

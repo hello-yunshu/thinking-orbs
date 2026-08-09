@@ -1,7 +1,7 @@
 {
   "name": "thinking-orbs",
-  "version": "0.2.0",
-  "description": "Dotted thought-orb loading indicators for AI & agent UIs — ten tuned states, two sizes, auto dark/light",
+  "version": "0.3.0",
+  "description": "Dotted thought-orb loading indicators for AI & agent UIs — ten tuned states, CSS colors, auto dark/light",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.es.js",
@@ -28,6 +28,9 @@
     "build": "vite build",
     "build:demo": "vite build --config vite.config.demo.ts",
     "typecheck": "tsc --noEmit",
+    "verify:colors": "node scripts/verify-colors.mjs",
+    "test": "npm run build && npm run verify:colors",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -58,16 +61,18 @@
     "llm",
     "canvas",
     "animation",
-    "dark-mode"
+    "dark-mode",
+    "css-variables",
+    "custom-color"
   ],
   "author": "Jakub Antalik",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jakubantalik/thinking-orbs.git"
+    "url": "git+https://github.com/hello-yunshu/thinking-orbs.git"
   },
   "bugs": {
-    "url": "https://github.com/Jakubantalik/thinking-orbs/issues"
+    "url": "https://github.com/hello-yunshu/thinking-orbs/issues"
   },
-  "homepage": "https://orbs.jakubantalik.com"
+  "homepage": "https://github.com/hello-yunshu/thinking-orbs#readme"
 }

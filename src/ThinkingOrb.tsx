@@ -27,6 +27,7 @@ export function ThinkingOrb({
   state = 'working',
   size = 64,
   theme = 'auto',
+  color,
   speed = 1,
   paused = false,
   style,
@@ -49,17 +50,56 @@ export function ThinkingOrb({
     const { mode, speed: baseSpeed, opts } = resolvePreset(state, size);
     const draw = MODE_DRAWS[mode];
     const effSpeed = baseSpeed * speed;
+    let resolvedColor: string | undefined;
+
+    const resolveColor = () => {
+      if (!color || !canvas.style.color) return undefined;
+      const computed = window.getComputedStyle(canvas).color.trim();
+      return computed || undefined;
+    };
 
     const frame = (tSec: number) => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size, size);
-      draw(ctx, size, tSec, dark, opts);
+      draw(ctx, size, tSec, dark, opts, resolvedColor);
+    };
+
+    resolvedColor = resolveColor();
+
+    const redrawForColorChange = () => {
+      resolvedColor = resolveColor();
+      frame(reduced ? 0.6 : (performance.now() / 1000) * effSpeed);
+    };
+
+    let colorObserver: MutationObserver | null = null;
+    let colorScheme: MediaQueryList | null = null;
+    if (color) {
+      if (typeof MutationObserver !== 'undefined') {
+        colorObserver = new MutationObserver(redrawForColorChange);
+        let node: Element | null = canvas;
+        while (node) {
+          colorObserver.observe(node, {
+            attributes: true,
+            attributeFilter: ['class', 'data-theme', 'style']
+          });
+          node = node.parentElement;
+        }
+      }
+      colorScheme = typeof matchMedia !== 'undefined'
+        ? matchMedia('(prefers-color-scheme: dark)')
+        : null;
+      colorScheme?.addEventListener('change', redrawForColorChange);
+    }
+
+    const cleanUpColor = () => {
+      colorObserver?.disconnect();
+      colorScheme?.removeEventListener('change', redrawForColorChange);
     };
 
     // reduced motion → one static, deterministic frame
     if (reduced) {
       frame(0.6);
-      return;
+      return cleanUpColor;
     }
 
     let raf = 0;
@@ -101,17 +141,24 @@ export function ThinkingOrb({
 
     return () => {
       stop();
+      cleanUpColor();
       io?.disconnect();
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [state, size, dark, speed, paused, reduced]);
+  }, [state, size, dark, color, speed, paused, reduced]);
 
   return (
     <canvas
       ref={ref}
       role="img"
       aria-label={ariaLabel ?? LABELS[state]}
-      style={{ width: size, height: size, display: 'block', ...style }}
+      style={{
+        width: size,
+        height: size,
+        display: 'block',
+        ...style,
+        ...(color ? { color } : {})
+      }}
       {...rest}
     />
   );

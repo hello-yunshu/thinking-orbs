@@ -63,6 +63,13 @@ export interface ThinkingOrbProps extends Omit<CanvasHTMLAttributes<HTMLCanvasEl
   theme?: OrbTheme;
 
   /**
+   * CSS color used to tint the orb while preserving its depth shading.
+   * Supports literals, `currentColor`, and CSS variables such as
+   * `var(--accent)`. When set, this takes precedence over `theme`.
+   */
+  color?: string;
+
+  /**
    * Animation speed multiplier on top of the preset's baked speed.
    * @default 1
    */

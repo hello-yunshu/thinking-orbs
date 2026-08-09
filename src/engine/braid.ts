@@ -5,7 +5,7 @@
 import type { Dot, ModeDraw } from './types';
 import { fibDir, frac, makeProj, paint, radiusScale } from './core';
 
-export const drawBraid: ModeDraw = (ctx, size, t, dark, o) => {
+export const drawBraid: ModeDraw = (ctx, size, t, dark, o, color) => {
   const cx = size / 2;
   const cy = size / 2;
   const R = (size / 2) * 0.76;
@@ -46,5 +46,5 @@ export const drawBraid: ModeDraw = (ctx, size, t, dark, o) => {
       });
     }
   }
-  paint(ctx, dots, dark, o.rMin);
+  paint(ctx, dots, dark, o.rMin, color);
 };

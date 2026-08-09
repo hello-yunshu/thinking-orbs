@@ -76,7 +76,7 @@ const SEG = HOLD + MORPH;
 // dots read a touch softer than inkform's. Don't "correct" for that by
 // shrinking the radius: it makes the mark genuinely smaller than the tuning.
 
-export const drawMorph: ModeDraw = (ctx, size, t, dark, o) => {
+export const drawMorph: ModeDraw = (ctx, size, t, dark, o, color) => {
   const K = CYCLE.length;
   const tc = t % (SEG * K);
   const k = Math.floor(tc / SEG);
@@ -134,5 +134,5 @@ export const drawMorph: ModeDraw = (ctx, size, t, dark, o) => {
       white: 0.1
     });
   }
-  paint(ctx, dots, dark, o.rMin);
+  paint(ctx, dots, dark, o.rMin, color);
 };

@@ -7,6 +7,7 @@ import { Playground } from './components/Playground';
 import { useTheme } from './hooks/useTheme';
 
 const USAGE_SNIPPET = `import { ThinkingOrb } from 'thinking-orbs';\n\n<ThinkingOrb state="listening" size={64} />`;
+const INSTALL_COMMAND = 'npm install github:hello-yunshu/thinking-orbs';
 
 export function App() {
   const [theme, toggleTheme] = useTheme();
@@ -39,8 +40,8 @@ export function App() {
       <section className="w-full mb-6" aria-label="Installation">
         <h2 className="text-base font-normal leading-[34px] text-(--section-title-color) mb-1">Installation</h2>
         <div className="flex items-center h-10 bg-(--code-bg) rounded-[10px] py-0.5 pr-10 pl-3 overflow-hidden relative">
-          <code className="font-[Roboto_Mono,monospace] text-sm leading-[22px] text-(--code-text) whitespace-pre overflow-x-auto min-w-0 flex-1">npm install thinking-orbs</code>
-          <CopyButton getText={() => 'npm install thinking-orbs'} />
+          <code className="font-[Roboto_Mono,monospace] text-sm leading-[22px] text-(--code-text) whitespace-pre overflow-x-auto min-w-0 flex-1">{INSTALL_COMMAND}</code>
+          <CopyButton getText={() => INSTALL_COMMAND} />
         </div>
       </section>
 
