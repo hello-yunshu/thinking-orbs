@@ -1,35 +1,59 @@
-name: Publish to npm
+name: Publish GitHub Release
 
-# Publishes the package on every git tag matching v* (e.g. v0.1.0, v1.0.0).
-# `--provenance` requires `id-token: write` and a registry-url with HTTPS,
-# and produces an attestation linking the tarball to this workflow run.
+# Builds and attaches the installable package to a GitHub Release for every
+# version tag. This fork intentionally does not publish to npm.
 
 on:
   push:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+          cache: npm
 
       - run: npm ci
 
-      - run: npm run build
+      - run: npm test
 
-      # Publish; --access public is required for unscoped packages on a
-      # personal account. The ORBS secret must be an npm "Automation" token
-      # with publish rights to the thinking-orbs package.
-      - run: npm publish --provenance --access public
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          if [[ "$GITHUB_REF_NAME" != "v${package_version}" ]]; then
+            echo "Tag $GITHUB_REF_NAME does not match package version $package_version" >&2
+            exit 1
+          fi
+
+      - name: Pack release assets
+        shell: bash
+        run: |
+          archive="thinking-orbs-${GITHUB_REF_NAME#v}.tgz"
+          npm pack --silent
+          test -f "$archive"
+          sha256sum "$archive" > "$archive.sha256"
+
+      - name: Create or update GitHub Release
+        shell: bash
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.ORBS }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive="thinking-orbs-${GITHUB_REF_NAME#v}.tgz"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$archive" "$archive.sha256" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$archive" "$archive.sha256" \
+              --verify-tag \
+              --generate-notes \
+              --title "thinking-orbs $GITHUB_REF_NAME"
+          fi
